@@ -1,35 +1,23 @@
 import { useState } from "react";
 import server from "./server";
-const { keccak256 } = require("ethereum-cryptography/keccak");
-const { hexToBytes, toHex, utf8ToBytes } = require("ethereum-cryptography/utils");
-const {secp256k1} = require("ethereum-cryptography/secp256k1");
-
+import { keccak256 } from "ethereum-cryptography/keccak";
+import { bytesToHex, bytesToUtf8, utf8ToBytes, toHex } from "ethereum-cryptography/utils";
+import { secp256k1 } from "ethereum-cryptography/secp256k1";
+BigInt.prototype.toJSON = function() { return this.toString() }
 // Make a simple message with sender:amount:recipient
 // This message gets verified at the backend server 
 // After verification, the sum operation is performed 
 // NOTE: The server stores the public key of users only
 
-
-function GetSign(msgHash, privateKey){
-
-  const digiSign = secp256k1.sign(msgHash, privateKey);
-
-  return digiSign;
+// function to get the transaction hash
+function getTransactionHash(transactionMsg){
+  const transactionMsgInString = JSON.stringify(transactionMsg);
+  return keccak256(utf8ToBytes(transactionMsgInString));
 }
 
-function GetHash(from, to, amount){
-
-  const msgString = from + to + toString(amount);
-
-  const msgHash = keccak256(utf8ToBytes(msgString));
-
-  console.log("Message Hash:" + toHex(msgHash));
-
-  // For simplicity we are assuming that address contains 
-  // the private key of the user 
-  return msgHash;
+async function getTransactionSignature(transactionMsg, privateKey){
+  return secp256k1.sign(transactionMsg, privateKey);
 }
-
 
 function Transfer({ address, setBalance, privateKey }) {
   const [sendAmount, setSendAmount] = useState("");
@@ -40,23 +28,38 @@ function Transfer({ address, setBalance, privateKey }) {
   async function transfer(evt) {
     evt.preventDefault();
 
-    const msgHash = GetHash(address, recipient, sendAmount);
-
-    const msgSign = GetSign(msgHash, privateKey);
-
     try {
+
+      const transaction = {
+        sender: address, //public key of the sender
+        amount: parseInt(sendAmount),
+        recipient
+      }
+      const msgHash = getTransactionHash(transaction);
+      transaction.transactionHash = toHex(msgHash);
+      console.log("privatekey:" + privateKey);
+      const signature = await getTransactionSignature(transaction.transactionHash, privateKey)
+      const r = signature.r.toString();
+      const s = signature.s.toString();
+      transaction.r = r;
+      transaction.s = s;
+      console.log("transaction.r:" + transaction.r)
+      console.log("transaction.r.type:" + transaction.r.type)
+
+      /*
+      const isValid = secp256k1.verify(signature, transaction.transactionHash, transaction.sender);
+      console.log(isValid)
+      //transaction.recoveryBit = recoveryBit;
+      */
+
       const {
         data: { balance },
-      } = await server.post(`send`, {
-        sender: address, // contains the public key of the sender 
-        amount: parseInt(sendAmount), 
-        recipient, //contains the public key of the recipient 
-        msgHash, // contains the hash msg 
-        msgSign //contains the signatured transaction msg
-      });
+      } = await server.post(`send`, transaction);
       setBalance(balance);
     } catch (ex) {
-      alert(ex.response.data.message);
+      console.log(ex);
+    } finally {
+      console.log("done");
     }
   }
 

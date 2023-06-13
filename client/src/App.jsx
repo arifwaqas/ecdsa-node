@@ -16,8 +16,8 @@ function App() {
       <Wallet
         balance={balance}
         setBalance={setBalance}
-        address={publicKey}
-        setAddress={setPublicKey}
+        publicKey={publicKey}
+        setPublicKey={setPublicKey}
         privateKey={privateKey}
         setPrivateKey={setPrivateKey}
       />

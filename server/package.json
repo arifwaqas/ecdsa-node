@@ -12,10 +12,10 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "ethereum-cryptography": "^2.0.0",
     "express": "^4.18.1"
   },
   "devDependencies": {
+    "ethereum-cryptography": "^0.2.5",
     "nodemon": "^2.0.22"
   }
 }
