@@ -1,14 +1,11 @@
 ## ECDSA Node
 
 This project is an example of using a client and server to facilitate transfers between different addresses. Since there is just a single server on the back-end handling transfers, this is clearly very centralized. We won't worry about distributed consensus for this project.
+It uses the SECP256K1 public key cryptography that is used in the proof of work consensus algorithm. Though this project doesnt exactly replicate the security features of the blockchain, the working at the very root of the giant network remains the same.
 
-However, something that we would like to incoporate is Public Key Cryptography. By using Elliptic Curve Digital Signatures we can make it so the server only allows transfers that have been signed for by the person who owns the associated address.
+### Screenshots
+![image](https://github.com/arifwaqas/ecdsa-node/assets/33687556/6e5aeaff-f0d6-427e-ae1f-249359fc27c6)
 
-### Video instructions
-For an overview of this project as well as getting started instructions, check out the following video:
-
-https://www.loom.com/share/0d3c74890b8e44a5918c4cacb3f646c4
- 
 ### Client
 
 The client folder contains a [react app](https://reactjs.org/) using [vite](https://vitejs.dev/). To get started, follow these steps:
